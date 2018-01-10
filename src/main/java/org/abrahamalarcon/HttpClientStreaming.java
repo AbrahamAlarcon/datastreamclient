@@ -19,9 +19,16 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
-public class HttpClient
+/**
+ * Streaming, since it is reusing the same long-lived connection to subscribe and send a message (STOMP)
+ * Doing this a Client can:
+ * 1) establish the connection
+ * 2) subscribe to some event based on an endpoint (based on REST architecture)
+ * 3) listen on the events and once a new event comes, replies back with the result of presssing it
+ */
+public class HttpClientStreaming
 {
-    private static Logger logger = Logger.getLogger(HttpClient.class.getName());
+    private static Logger logger = Logger.getLogger(HttpClientStreaming.class.getName());
     private final static WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 
     public ListenableFuture<StompSession> connect()
@@ -67,16 +74,17 @@ public class HttpClient
     }
 
     public static void main(String[] args) throws Exception {
-        HttpClient client = new HttpClient();
+        HttpClientStreaming client = new HttpClientStreaming();
 
         ListenableFuture<StompSession> f = client.connect();
         StompSession stompSession = f.get();
 
         String clientId = "client1", eventId = "geolookup";
-        String topic = String.format("/queue/%s/%s", clientId, eventId);
 
+        String topic = String.format("/queue/%s/%s", clientId, eventId);
         logger.info(String.format("Subscribing to topic %s using session ", topic) + stompSession);
         client.subscribe(topic, stompSession);
+
 
         for(int i = 1; i < 6; i++)
         {
@@ -86,7 +94,7 @@ public class HttpClient
             client.send(endpoint, "{\"country\":\"Chile\",\"city\":\"Santiago\"}", stompSession);
         }
 
-        Thread.sleep(60000);
+        Thread.sleep(10000);
     }
 
 }

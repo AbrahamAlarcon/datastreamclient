@@ -1,4 +1,4 @@
-package org.abrahamalarcon;
+package org.abrahamalarcon.pubsub;
 
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
@@ -19,9 +19,16 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
-public class HttpClientSubscriber
+/**
+ * Streaming, since it is reusing the same long-lived connection to subscribe and send a message (STOMP)
+ * Doing this a Client can:
+ * 1) establish the connection
+ * 2) subscribe to some event based on an endpoint (based on REST architecture)
+ * 3) listen on the events and once a new event comes, replies back with the result of presssing it
+ */
+public class HttpClientPubSub
 {
-    private static Logger logger = Logger.getLogger(HttpClientPublisher.class.getName());
+    private static Logger logger = Logger.getLogger(HttpClientPubSub.class.getName());
     private final static WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 
     public ListenableFuture<StompSession> connect()
@@ -67,18 +74,25 @@ public class HttpClientSubscriber
     }
 
     public static void main(String[] args) throws Exception {
-        HttpClientSubscriber client = new HttpClientSubscriber();
+        HttpClientPubSub client = new HttpClientPubSub();
 
         ListenableFuture<StompSession> f = client.connect();
         StompSession stompSession = f.get();
 
         String clientId = "client1", eventId = "geolookup";
-        String topic = String.format("/queue/%s/%s", clientId, eventId);
 
+        String topic = String.format("/queue/%s/%s", clientId, eventId);
         logger.info(String.format("Subscribing to topic %s using session ", topic) + stompSession);
         client.subscribe(topic, stompSession);
 
-        Thread.sleep(1000000);
+        for(int i = 1; i < 6; i++)
+        {
+            String endpoint = String.format("/app/notifyme/%s/%s/%s", clientId, eventId, i);
+            logger.info(String.format("Sending message to %s", endpoint) + stompSession);
+            client.send(endpoint, "{\"country\":\"Chile\",\"city\":\"Santiago\"}", stompSession);
+        }
+
+        Thread.sleep(10000);
     }
 
 }

@@ -1,4 +1,4 @@
-package org.abrahamalarcon;
+package org.abrahamalarcon.pubsub;
 
 import org.springframework.messaging.simp.stomp.StompFrameHandler;
 import org.springframework.messaging.simp.stomp.StompHeaders;
@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 
-public class HttpClientPublisher
+public class HttpClientSubscriber
 {
     private static Logger logger = Logger.getLogger(HttpClientPublisher.class.getName());
     private final static WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
@@ -53,11 +53,6 @@ public class HttpClientPublisher
         });
     }
 
-    public void send(String endpoint, String message, StompSession stompSession)
-    {
-        stompSession.send(endpoint, message.getBytes());
-    }
-
     private class MyHandler extends StompSessionHandlerAdapter
     {
         public void afterConnected(StompSession stompSession, StompHeaders stompHeaders)
@@ -67,26 +62,16 @@ public class HttpClientPublisher
     }
 
     public static void main(String[] args) throws Exception {
-        HttpClientPublisher client = new HttpClientPublisher();
+        HttpClientSubscriber client = new HttpClientSubscriber();
 
         ListenableFuture<StompSession> f = client.connect();
         StompSession stompSession = f.get();
 
         String clientId = "client1", eventId = "geolookup";
-        /*
         String topic = String.format("/queue/%s/%s", clientId, eventId);
 
         logger.info(String.format("Subscribing to topic %s using session ", topic) + stompSession);
         client.subscribe(topic, stompSession);
-        */
-
-        for(int i = 1; i < 6; i++)
-        {
-            String endpoint = String.format("/stream/notifyme/%s/%s/%s", clientId, eventId, i);
-
-            logger.info(String.format("Sending message to %s", endpoint) + stompSession);
-            client.send(endpoint, "{\"country\":\"Chile\",\"city\":\"Santiago\"}", stompSession);
-        }
 
         Thread.sleep(1000000);
     }

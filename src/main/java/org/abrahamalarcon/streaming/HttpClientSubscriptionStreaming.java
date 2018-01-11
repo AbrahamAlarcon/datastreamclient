@@ -63,8 +63,8 @@ public class HttpClientSubscriptionStreaming
 
         String clientId = "client1", eventId = "geolookup";
 
-        String stream1 = String.format("/stream/in/%s/%s", clientId, eventId);
-        String stream2 = String.format("/stream/out/%s/%s", clientId, eventId);;
+        String stream1 = String.format("/instream/%s/%s", clientId, eventId);
+        String stream2 = String.format("/outstream/%s/%s", clientId, eventId);;
 
         //subscribe on stream 1 and listen
         logger.info(String.format("Subscribing to stream %s", stream1) + stompSession);
@@ -82,7 +82,7 @@ public class HttpClientSubscriptionStreaming
         });
 
         //send a subscription event and activate stream 1
-        String endpoint = String.format("/app/subscription/%s/%s", clientId, eventId);
+        String endpoint = String.format("/subscription/%s/%s", clientId, eventId);
         logger.info(String.format("Sending message to %s", endpoint) + stompSession);
         stompSession.send(endpoint, "{}".getBytes());
 

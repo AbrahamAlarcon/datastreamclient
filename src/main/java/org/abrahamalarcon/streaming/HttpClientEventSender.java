@@ -20,6 +20,12 @@ public class HttpClientEventSender
 {
     private static Logger logger = Logger.getLogger(HttpClientEventSender.class.getName());
     private final static WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
+    private final static String hostname =
+            //"datastream-creditmarketingapi.apps.appcanvas.net";
+            "localhost";
+    private final static int port =
+            //80;
+            8000;
 
     public ListenableFuture<StompSession> connect()
     {
@@ -32,7 +38,7 @@ public class HttpClientEventSender
         WebSocketStompClient stompClient = new WebSocketStompClient(sockJsClient);
 
         String url = "ws://{host}:{port}/ws";
-        return stompClient.connect(url, headers, new MyHandler(), "localhost", 8000);
+        return stompClient.connect(url, headers, new MyHandler(), hostname, port);
     }
 
     public void send(String endpoint, String message, StompSession stompSession)

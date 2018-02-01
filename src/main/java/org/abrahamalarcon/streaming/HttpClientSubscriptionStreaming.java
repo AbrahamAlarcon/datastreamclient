@@ -32,6 +32,12 @@ public class HttpClientSubscriptionStreaming
 {
     private static Logger logger = Logger.getLogger(HttpClientSubscriptionStreaming.class.getName());
     private final static WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
+    private final static String hostname =
+            //"datastream-creditmarketingapi.apps.appcanvas.net";
+            "localhost";
+    private final static int port =
+            //80;
+            8000;
 
     public ListenableFuture<StompSession> connect()
     {
@@ -44,7 +50,7 @@ public class HttpClientSubscriptionStreaming
         WebSocketStompClient stompClient = new WebSocketStompClient(sockJsClient);
 
         String url = "ws://{host}:{port}/ws";
-        return stompClient.connect(url, headers, new MyHandler(), "localhost", 8000);
+        return stompClient.connect(url, headers, new MyHandler(), hostname, port);
     }
 
     private class MyHandler extends StompSessionHandlerAdapter
@@ -84,6 +90,7 @@ public class HttpClientSubscriptionStreaming
         //send a subscription event and activate stream 1
         String endpoint = String.format("/subscription/%s/%s", clientId, eventId);
         logger.info(String.format("Sending message to %s", endpoint) + stompSession);
+        //stompSession.send(endpoint, "{uuid response{version location{type tz_long wuiurl}} error{message}}".getBytes());
         stompSession.send(endpoint, "{}".getBytes());
 
         //subscribe on stream 2 and listen
